@@ -1,0 +1,274 @@
+/* Shared HUD military theme for auth pages (signin, signup, verify-email, set-password) */
+
+body {
+    background-color: #080b08;
+    background-image:
+        radial-gradient(circle at 50% 0%, rgba(74, 222, 128, 0.08) 0%, transparent 75%),
+        linear-gradient(to right, rgba(74, 222, 128, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(74, 222, 128, 0.03) 1px, transparent 1px);
+    background-size: 100% 100%, 24px 24px, 24px 24px;
+    color: #d1d5db;
+    min-height: 100vh;
+}
+
+.scanline {
+    width: 100%;
+    height: 2px;
+    background: rgba(74, 222, 128, 0.15);
+    position: fixed;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+    animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+    0% { top: 0%; opacity: 0; }
+    50% { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+}
+
+.hud-card {
+    background: rgba(18, 23, 19, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(74, 222, 128, 0.25);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(74, 222, 128, 0.03);
+    position: relative;
+}
+
+.hud-card::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid #4ade80;
+    border-left: 2px solid #4ade80;
+}
+
+.hud-card::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid #4ade80;
+    border-right: 2px solid #4ade80;
+}
+
+.hud-field {
+    background: rgba(10, 13, 10, 0.7);
+    border: 1px solid #2a362c;
+    transition: all 0.2s ease;
+}
+
+.hud-field:hover {
+    border-color: rgba(74, 222, 128, 0.5);
+    box-shadow: 0 0 10px rgba(74, 222, 128, 0.1);
+}
+
+.hud-field:focus-within,
+input.hud-field:focus {
+    outline: none;
+    border-color: #4ade80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+.hud-field.error {
+    border-color: #f87171;
+    box-shadow: 0 0 12px rgba(248, 113, 113, 0.2);
+}
+
+.form-error {
+    display: none;
+    color: #f87171;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    margin-top: 0.35rem;
+}
+
+.form-error.show { display: block; }
+
+.btn-primary {
+    background: rgba(74, 222, 128, 0.12);
+    border: 1px solid rgba(74, 222, 128, 0.5);
+    color: #4ade80;
+    font-family: 'Share Tech Mono', monospace;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: rgba(74, 222, 128, 0.22);
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.25);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) { transform: scale(0.98); }
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-ghost {
+    background: rgba(28, 36, 29, 0.8);
+    border: 1px solid #3f5242;
+    color: #9ca3af;
+    font-family: 'Share Tech Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    transition: all 0.2s ease;
+}
+
+.btn-ghost:hover:not(:disabled) {
+    border-color: rgba(74, 222, 128, 0.5);
+    color: #d1d5db;
+}
+
+.btn-ghost:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* OTP code boxes */
+#otpRow {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0 1rem;
+    box-sizing: border-box;
+}
+
+.otp-input {
+    width: 100%;
+    min-width: 0;
+    height: 3.5rem;
+    text-align: center;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4ade80;
+    background: rgba(10, 13, 10, 0.7);
+    border: 1px solid #2a362c;
+    border-radius: 0.375rem;
+    caret-color: #4ade80;
+    transition: all 0.15s ease;
+}
+
+.otp-input:focus {
+    outline: none;
+    border-color: #4ade80;
+    box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+    transform: scale(1.05);
+}
+
+.otp-input.filled {
+    border-color: rgba(74, 222, 128, 0.6);
+    background: rgba(74, 222, 128, 0.08);
+}
+
+.otp-input.error {
+    border-color: #f87171;
+    color: #f87171;
+}
+
+@media (max-width: 400px) {
+    #otpRow { gap: 0.25rem; padding: 0 0.25rem; }
+    .otp-input { height: 3rem; font-size: 1.25rem; }
+}
+
+/* Password strength bar */
+.strength-track {
+    height: 4px;
+    background: #1c241d;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    background: #f87171;
+    transition: width 0.3s ease, background 0.3s ease;
+}
+
+.strength-bar.weak { width: 33%; background: #f87171; }
+.strength-bar.medium { width: 66%; background: #fbbf24; }
+.strength-bar.strong { width: 100%; background: #4ade80; }
+
+/* Requirement checklist */
+.req-item { color: #6b7280; transition: color 0.2s ease; }
+.req-item.met { color: #4ade80; }
+.req-item.met i::before { content: '\f00c'; }
+
+/* Shake animation for invalid input */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-6px); }
+    40%, 80% { transform: translateX(6px); }
+}
+
+.shake { animation: shake 0.4s ease; }
+
+/* Fade-up entrance */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.5s ease both; }
+.fade-up-delay { animation: fadeUp 0.5s ease 0.15s both; }
+
+/* Loading spinner */
+.loading-spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid rgba(74, 222, 128, 0.3);
+    border-top-color: #4ade80;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: -0.15em;
+    margin-right: 0.5em;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast notifications */
+#toastContainer {
+    position: fixed;
+    top: 1.25rem;
+    right: 1.25rem;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    max-width: min(24rem, calc(100vw - 2.5rem));
+}
+
+.toast {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    background: rgba(18, 23, 19, 0.95);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+    animation: fadeUp 0.3s ease;
+}
+
+.toast.error { border-color: rgba(248, 113, 113, 0.5); color: #f87171; }
+.toast.info { border-color: rgba(0, 240, 255, 0.4); color: #00f0ff; }
+
+/* Demo transmission panel (only shown when Supabase is not configured) */
+.demo-panel {
+    border: 1px dashed rgba(251, 191, 36, 0.5);
+    background: rgba(251, 191, 36, 0.06);
+    color: #fbbf24;
+}

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - USAG Okinawa</title>
+    <link rel="icon" type="image/svg+xml" href="./japan-flag.svg?v=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        military: {
+                            950: '#0a0d0a', 900: '#121713', 800: '#1c241d', 700: '#2a362c',
+                            600: '#3d4f40', border: '#3f5242', accent: '#4ade80',
+                            gold: '#fbbf24', alert: '#f87171', hud: '#00f0ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/auth.css?v=2">
+</head>
+<body class="font-sans flex items-center justify-center p-4 py-10">
+    <div class="scanline"></div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-up">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-military-900 border border-military-accent/40 flex items-center justify-center overflow-hidden shadow-[0_0_25px_rgba(74,222,128,0.15)]">
+                <img src="./usag-logo.png?v=1" alt="USAG Okinawa" class="w-full h-full object-contain" width="80" height="80" decoding="async" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-user-plus text-3xl text-military-accent\'></i>'">
+            </div>
+            <p class="font-mono text-[10px] tracking-[0.3em] text-military-accent/70 uppercase mb-1">USAG Okinawa // Identity Synchronization</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wide">Activate Your Profile</h1>
+            <p class="text-gray-400 text-sm mt-3 max-w-sm mx-auto">
+                Enter your name and the email address registered. A verification code will be transmitted to confirm ownership.
+            </p>
+        </div>
+
+        <!-- Step indicator -->
+        <div class="flex items-center justify-center gap-2 mb-6 font-mono text-[10px] uppercase tracking-widest fade-up">
+            <span class="px-3 py-1 rounded border border-military-accent text-military-accent">1 · Identify</span>
+            <span class="text-gray-600"><i class="fa-solid fa-chevron-right"></i></span>
+            <span class="px-3 py-1 rounded border border-military-border text-gray-500">2 · Verify</span>
+            <span class="text-gray-600"><i class="fa-solid fa-chevron-right"></i></span>
+            <span class="px-3 py-1 rounded border border-military-border text-gray-500">3 · Secure</span>
+        </div>
+
+        <!-- Card -->
+        <div class="hud-card rounded-lg p-6 sm:p-8 fade-up-delay">
+            <form id="signupForm" novalidate>
+                <!-- Full name -->
+                <div class="mb-5">
+                    <label for="fullName" class="block font-mono text-xs font-bold text-military-accent uppercase tracking-widest mb-2">Full Name</label>
+                    <div class="hud-field rounded flex items-center">
+                        <span class="pl-3 pr-2 text-gray-500"><i class="fa-solid fa-id-card"></i></span>
+                        <input type="text" id="fullName" autocomplete="name" placeholder="Enter your full name"
+                            class="w-full bg-transparent px-2 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono">
+                    </div>
+                    <p class="form-error" id="nameError"></p>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-6">
+                    <label for="email" class="block font-mono text-xs font-bold text-military-accent uppercase tracking-widest mb-2">Email Address</label>
+                    <div class="hud-field rounded flex items-center">
+                        <span class="pl-3 pr-2 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="email" autocomplete="email" placeholder="Enter your registered email"
+                            class="w-full bg-transparent px-2 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono">
+                    </div>
+                    <p class="form-error" id="emailError"></p>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary w-full py-3.5 rounded text-sm">
+                    Send Verification Code
+                </button>
+            </form>
+
+            <p class="text-center font-mono text-xs text-gray-500 mt-6">
+                Already activated?
+                <a href="signin.html" class="text-military-accent hover:underline uppercase tracking-wider">Sign in</a>
+            </p>
+        </div>
+
+        <p class="text-center font-mono text-[10px] text-gray-600 mt-6 uppercase tracking-widest fade-up-delay">
+            SEC-LEVEL: 04 // Eligibility is verified against trusted records
+        </p>
+    </div>
+
+    <script src="js/supabase-config.js?v=connected2"></script>
+    <script src="js/auth.js?v=supabase1"></script>
+    <script src="js/ja.js?v=delivery2"></script>
+    <script>
+        const form = document.getElementById('signupForm');
+        const nameInput = document.getElementById('fullName');
+        const emailInput = document.getElementById('email');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function showError(input, errorEl, msg) {
+            input.closest('.hud-field').classList.add('error');
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+        }
+        function clearError(input, errorEl) {
+            input.closest('.hud-field').classList.remove('error');
+            errorEl.classList.remove('show');
+        }
+
+        nameInput.addEventListener('input', () => clearError(nameInput, document.getElementById('nameError')));
+        emailInput.addEventListener('input', () => clearError(emailInput, document.getElementById('emailError')));
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const fullName = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            let valid = true;
+
+            if (!fullName) { showError(nameInput, document.getElementById('nameError'), '氏名は必須です'); valid = false; }
+            if (!email) { showError(emailInput, document.getElementById('emailError'), 'メールアドレスは必須です'); valid = false; }
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError(emailInput, document.getElementById('emailError'), '有効なメールアドレスを入力してください'); valid = false; }
+            else if (!Auth.isAllowedEmail(email)) { showError(emailInput, document.getElementById('emailError'), 'アカウントを作成する権限がありません'); valid = false; }
+            if (!valid) { form.classList.add('shake'); setTimeout(() => form.classList.remove('shake'), 450); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Transmitting code...';
+            const sent = await Auth.sendOtp(email);
+            if (!sent.ok) {
+                Auth.toast(sent.error || '認証コードを送信できませんでした', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Verification Code';
+                return;
+            }
+
+            Auth.setPending({ fullName, email, verified: false, at: Date.now() });
+            Auth.toast('Verification code transmitted', 'info');
+            setTimeout(() => { window.location.href = 'verify-email.html?v=2'; }, 700);
+        });
+    </script>
+</body>
+</html>

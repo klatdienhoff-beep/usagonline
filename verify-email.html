@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - USAG Okinawa</title>
+    <link rel="icon" type="image/svg+xml" href="./japan-flag.svg?v=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        military: {
+                            950: '#0a0d0a', 900: '#121713', 800: '#1c241d', 700: '#2a362c',
+                            600: '#3d4f40', border: '#3f5242', accent: '#4ade80',
+                            gold: '#fbbf24', alert: '#f87171', hud: '#00f0ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/auth.css?v=2">
+</head>
+<body class="font-sans flex items-center justify-center p-4 py-10">
+    <div class="scanline"></div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-up">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-military-900 border border-military-hud/40 flex items-center justify-center shadow-[0_0_25px_rgba(0,240,255,0.15)]">
+                <i class="fa-solid fa-satellite-dish text-3xl text-military-hud"></i>
+            </div>
+            <p class="font-mono text-[10px] tracking-[0.3em] text-military-accent/70 uppercase mb-1">USAG Okinawa // Identity Synchronization</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wide">Verify Your Email</h1>
+            <p class="text-gray-400 text-sm mt-3 max-w-sm mx-auto">
+                An 8-digit verification code was transmitted to
+                <span id="emailDisplay" class="text-military-accent font-mono"></span>
+            </p>
+        </div>
+
+        <!-- Step indicator -->
+        <div class="flex items-center justify-center gap-2 mb-6 font-mono text-[10px] uppercase tracking-widest fade-up">
+            <span class="px-3 py-1 rounded border border-military-border text-gray-500"><i class="fa-solid fa-check text-military-accent"></i> Identify</span>
+            <span class="text-gray-600"><i class="fa-solid fa-chevron-right"></i></span>
+            <span class="px-3 py-1 rounded border border-military-hud text-military-hud">2 · Verify</span>
+            <span class="text-gray-600"><i class="fa-solid fa-chevron-right"></i></span>
+            <span class="px-3 py-1 rounded border border-military-border text-gray-500">3 · Secure</span>
+        </div>
+
+        <!-- Card -->
+        <div class="hud-card rounded-lg p-6 sm:p-8 fade-up-delay">
+            <form id="verifyForm" novalidate>
+                <label class="block font-mono text-xs font-bold text-military-accent uppercase tracking-widest mb-3 text-center">Enter Verification Code</label>
+                <div class="flex justify-center gap-2 sm:gap-3 mb-2" id="otpRow">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 1" autocomplete="one-time-code">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 2">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 3">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 4">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 5">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 6">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 7">
+                    <input type="text" inputmode="numeric" maxlength="1" class="otp-input" aria-label="Digit 8">
+                </div>
+                <p class="form-error text-center" id="otpError"></p>
+
+                <button type="submit" id="verifyBtn" class="btn-primary w-full py-3.5 rounded text-sm mt-5" disabled>
+                    Verify Code
+                </button>
+            </form>
+
+            <div class="text-center mt-6 font-mono text-xs text-gray-500">
+                <span id="resendLabel">Didn't receive a code?</span>
+                <button id="resendBtn" class="text-military-hud hover:underline uppercase tracking-wider disabled:opacity-50 disabled:no-underline" disabled>
+                    Resend <span id="countdown"></span>
+                </button>
+            </div>
+
+            <p class="text-center font-mono text-xs text-gray-500 mt-4">
+                Wrong email?
+                <a href="index.html" class="text-military-accent hover:underline uppercase tracking-wider">Start over</a>
+            </p>
+        </div>
+
+        <p class="text-center font-mono text-[10px] text-gray-600 mt-6 uppercase tracking-widest fade-up-delay">
+            SEC-LEVEL: 04 // Codes expire and resend is rate-limited
+        </p>
+    </div>
+
+    <script src="js/supabase-config.js?v=connected2"></script>
+    <script src="js/auth.js?v=supabase1"></script>
+    <script src="js/ja.js?v=2"></script>
+    <script>
+        const pending = Auth.getPending();
+        if (!pending || !pending.email || !Auth.isAllowedEmail(pending.email)) {
+            window.location.href = 'index.html';
+        } else {
+            document.getElementById('emailDisplay').textContent = pending.email;
+
+        /* ---------- OTP inputs ---------- */
+        const inputs = Array.from(document.querySelectorAll('.otp-input'));
+        const verifyBtn = document.getElementById('verifyBtn');
+        const otpError = document.getElementById('otpError');
+
+        function currentCode() { return inputs.map(i => i.value).join(''); }
+
+        function refreshState() {
+            inputs.forEach(i => i.classList.toggle('filled', !!i.value));
+            verifyBtn.disabled = currentCode().length !== 8;
+        }
+
+        inputs.forEach((input, idx) => {
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/\D/g, '').slice(0, 1);
+                input.classList.remove('error');
+                otpError.classList.remove('show');
+                if (input.value && idx < inputs.length - 1) inputs[idx + 1].focus();
+                refreshState();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && idx > 0) {
+                    inputs[idx - 1].focus();
+                    inputs[idx - 1].value = '';
+                    refreshState();
+                }
+                if (e.key === 'ArrowLeft' && idx > 0) inputs[idx - 1].focus();
+                if (e.key === 'ArrowRight' && idx < inputs.length - 1) inputs[idx + 1].focus();
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const digits = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 8);
+                digits.split('').forEach((d, i) => { inputs[i].value = d; });
+                if (digits.length) inputs[Math.min(digits.length, 7)].focus();
+                refreshState();
+            });
+        });
+
+        inputs[0].focus();
+
+        /* ---------- verify ---------- */
+        document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = currentCode();
+            if (code.length !== 8) return;
+
+            verifyBtn.disabled = true;
+            verifyBtn.innerHTML = '<span class="loading-spinner"></span>Verifying...';
+
+            const res = await Auth.verifyOtp(pending.email, code);
+            if (res.ok) {
+                Auth.setPending({ ...pending, verified: true });
+                Auth.toast('EMAIL VERIFIED — proceed to secure your account');
+                setTimeout(() => { window.location.href = 'set-password.html'; }, 800);
+            } else {
+                inputs.forEach(i => i.classList.add('error'));
+                otpError.textContent = res.error || '認証に失敗しました';
+                otpError.classList.add('show');
+                document.getElementById('otpRow').classList.add('shake');
+                setTimeout(() => document.getElementById('otpRow').classList.remove('shake'), 450);
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verify Code';
+            }
+        });
+
+        /* ---------- resend with countdown (rate limit) ---------- */
+        const resendBtn = document.getElementById('resendBtn');
+        const countdownEl = document.getElementById('countdown');
+        let timer = null;
+
+        function startCountdown(seconds) {
+            resendBtn.disabled = true;
+            let remaining = seconds;
+            countdownEl.textContent = `(${remaining}s)`;
+            timer = setInterval(() => {
+                remaining--;
+                countdownEl.textContent = remaining > 0 ? `(${remaining}s)` : '';
+                if (remaining <= 0) { clearInterval(timer); resendBtn.disabled = false; }
+            }, 1000);
+        }
+
+        resendBtn.addEventListener('click', async () => {
+            const sent = await Auth.sendOtp(pending.email);
+            if (sent.ok) {
+                Auth.toast('New verification code transmitted', 'info');
+                startCountdown(60);
+            } else {
+                Auth.toast(sent.error || 'コードを再送信できませんでした', 'error');
+            }
+        });
+
+            startCountdown(60);
+        }
+    </script>
+</body>
+</html>

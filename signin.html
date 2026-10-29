@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Sign-In - USAG Okinawa</title>
+    <link rel="icon" type="image/svg+xml" href="./japan-flag.svg?v=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Chakra Petch', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        military: {
+                            950: '#0a0d0a', 900: '#121713', 800: '#1c241d', 700: '#2a362c',
+                            600: '#3d4f40', border: '#3f5242', accent: '#4ade80',
+                            gold: '#fbbf24', alert: '#f87171', hud: '#00f0ff'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="css/auth.css?v=2">
+</head>
+<body class="font-sans flex items-center justify-center p-4 py-10">
+    <div class="scanline"></div>
+
+    <div class="w-full max-w-md relative z-10">
+        <!-- Header -->
+        <div class="text-center mb-8 fade-up">
+            <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-military-900 border border-military-accent/40 flex items-center justify-center overflow-hidden shadow-[0_0_25px_rgba(74,222,128,0.15)]">
+                <img src="./usag-logo.png?v=1" alt="USAG Okinawa" class="w-full h-full object-contain" width="80" height="80" decoding="async" onerror="this.parentElement.innerHTML='<i class=\'fa-solid fa-shield-halved text-3xl text-military-accent\'></i>'">
+            </div>
+            <p class="font-mono text-[10px] tracking-[0.3em] text-military-accent/70 uppercase mb-1">USAG Okinawa // Secure Access</p>
+            <h1 class="text-2xl sm:text-3xl font-bold text-white tracking-wide">Personnel Sign-In</h1>
+            <div class="flex items-center justify-center gap-2 mt-3 font-mono text-[10px] text-gray-500 uppercase tracking-widest">
+                <i class="fa-solid fa-lock text-military-accent"></i>
+                <span>Encrypted Secure Connection</span>
+            </div>
+        </div>
+
+        <!-- Card -->
+        <div class="hud-card rounded-lg p-6 sm:p-8 fade-up-delay">
+            <form id="signinForm" novalidate>
+                <!-- Email -->
+                <div class="mb-5">
+                    <label for="email" class="block font-mono text-xs font-bold text-military-accent uppercase tracking-widest mb-2">Email Address</label>
+                    <div class="hud-field rounded flex items-center">
+                        <span class="pl-3 pr-2 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="email" autocomplete="email" placeholder="Enter your email address"
+                            class="w-full bg-transparent px-2 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono">
+                    </div>
+                    <p class="form-error" id="emailError"></p>
+                </div>
+
+                <!-- Password -->
+                <div class="mb-4">
+                    <label for="password" class="block font-mono text-xs font-bold text-military-accent uppercase tracking-widest mb-2">Password</label>
+                    <div class="hud-field rounded flex items-center">
+                        <span class="pl-3 pr-2 text-gray-500"><i class="fa-solid fa-key"></i></span>
+                        <input type="password" id="password" autocomplete="current-password" placeholder="Enter your password"
+                            class="w-full bg-transparent px-2 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono">
+                        <button type="button" id="togglePassword" class="px-3 text-gray-500 hover:text-military-accent transition-colors" aria-label="Show password">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
+                    <p class="form-error" id="passwordError"></p>
+                </div>
+
+                <!-- Remember / forgot -->
+                <div class="flex items-center justify-between mb-6 text-xs font-mono">
+                    <label class="flex items-center gap-2 text-gray-400 cursor-pointer select-none">
+                        <input type="checkbox" id="remember" class="accent-green-500 w-3.5 h-3.5">
+                        <span>Remember device</span>
+                    </label>
+                    <button type="button" id="forgotLink" class="text-military-hud hover:underline uppercase tracking-wider">Forgot password?</button>
+                </div>
+
+                <button type="submit" id="submitBtn" class="btn-primary w-full py-3.5 rounded text-sm">
+                    Authenticate
+                </button>
+            </form>
+
+            <div class="my-5 flex items-center gap-3 text-gray-600 font-mono text-[10px] uppercase">
+                <span class="h-px flex-1 bg-military-border"></span>
+                <span>or</span>
+                <span class="h-px flex-1 bg-military-border"></span>
+            </div>
+            <button type="button" id="googleSignIn" class="btn-ghost w-full py-3 rounded text-sm">
+                <i class="fa-brands fa-google mr-2"></i>Continue with Google
+            </button>
+
+            <p class="text-center font-mono text-xs text-gray-500 mt-6">
+                サインインできるアカウント：b1cksp1c2@gmail.com、dashboardash@gmail.com、98205knji34@gmail.com
+                <a href="index.html" class="text-military-accent hover:underline uppercase tracking-wider">Sign up</a>
+            </p>
+        </div>
+
+        <p class="text-center font-mono text-[10px] text-gray-600 mt-6 uppercase tracking-widest fade-up-delay">
+            SEC-LEVEL: 04 // Unauthorized access is prohibited
+        </p>
+    </div>
+
+    <!-- Forgot password modal -->
+    <div id="forgotModal" class="hidden fixed inset-0 bg-black/85 backdrop-blur-md items-center justify-center z-50 p-4">
+        <div class="hud-card max-w-md w-full rounded p-6 relative">
+            <h3 class="text-lg font-mono font-bold text-military-accent uppercase tracking-widest mb-2">Reset Password</h3>
+            <p class="text-gray-400 font-mono text-xs mb-5">Enter the email address of your activated profile. A reset link will be transmitted if the profile exists.</p>
+            <div class="hud-field rounded flex items-center mb-4">
+                <span class="pl-3 pr-2 text-gray-500"><i class="fa-solid fa-envelope"></i></span>
+                <input type="email" id="resetEmail" placeholder="Enter your email address"
+                    class="w-full bg-transparent px-2 py-3 text-sm text-gray-200 placeholder-gray-600 focus:outline-none font-mono">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button id="resetCancel" class="btn-ghost py-2.5 rounded text-xs">Cancel</button>
+                <button id="resetSend" class="btn-primary py-2.5 rounded text-xs">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js?v=connected2"></script>
+    <script src="js/auth.js?v=supabase1"></script>
+    <script src="js/ja.js?v=2"></script>
+    <script>
+        const form = document.getElementById('signinForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const submitBtn = document.getElementById('submitBtn');
+        const rememberBox = document.getElementById('remember');
+
+        // Restore remembered device
+        if (localStorage.getItem('rememberDevice')) {
+            emailInput.value = localStorage.getItem('rememberDevice');
+            rememberBox.checked = true;
+        }
+
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const showing = passwordInput.type === 'text';
+            passwordInput.type = showing ? 'password' : 'text';
+            this.innerHTML = showing ? '<i class="fa-solid fa-eye"></i>' : '<i class="fa-solid fa-eye-slash"></i>';
+            this.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+        });
+
+        function showError(input, errorEl, msg) {
+            input.closest('.hud-field').classList.add('error');
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+        }
+        function clearError(input, errorEl) {
+            input.closest('.hud-field').classList.remove('error');
+            errorEl.classList.remove('show');
+        }
+
+        emailInput.addEventListener('input', () => clearError(emailInput, document.getElementById('emailError')));
+        passwordInput.addEventListener('input', () => clearError(passwordInput, document.getElementById('passwordError')));
+        document.getElementById('googleSignIn').addEventListener('click', () => {
+            Auth.signInWithGoogle().then(res => {
+                if (!res.ok) Auth.toast(res.error, 'error');
+            });
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            let valid = true;
+
+            if (!email) { showError(emailInput, document.getElementById('emailError'), 'メールアドレスは必須です'); valid = false; }
+            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError(emailInput, document.getElementById('emailError'), '有効なメールアドレスを入力してください'); valid = false; }
+            else if (!Auth.isAllowedEmail(email)) { showError(emailInput, document.getElementById('emailError'), 'サインインする権限がありません'); valid = false; }
+            if (!password) { showError(passwordInput, document.getElementById('passwordError'), 'パスワードは必須です'); valid = false; }
+            if (!valid) { form.classList.add('shake'); setTimeout(() => form.classList.remove('shake'), 450); return; }
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="loading-spinner"></span>Authenticating...';
+
+            const res = await Auth.signIn(email, password);
+            if (res.ok) {
+                if (rememberBox.checked) localStorage.setItem('rememberDevice', email);
+                else localStorage.removeItem('rememberDevice');
+                Auth.toast('ACCESS GRANTED — redirecting to profile');
+                setTimeout(() => { window.location.href = Auth.profileUrl(email); }, 800);
+            } else {
+                Auth.toast(res.error || '認証に失敗しました', 'error');
+                form.classList.add('shake'); setTimeout(() => form.classList.remove('shake'), 450);
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Authenticate';
+            }
+        });
+
+        // Forgot password modal
+        const forgotModal = document.getElementById('forgotModal');
+        document.getElementById('forgotLink').addEventListener('click', () => {
+            document.getElementById('resetEmail').value = emailInput.value.trim();
+            forgotModal.classList.remove('hidden');
+            forgotModal.classList.add('flex');
+        });
+        const closeModal = () => { forgotModal.classList.add('hidden'); forgotModal.classList.remove('flex'); };
+        document.getElementById('resetCancel').addEventListener('click', closeModal);
+        forgotModal.addEventListener('click', (e) => { if (e.target === forgotModal) closeModal(); });
+
+        document.getElementById('resetSend').addEventListener('click', async function () {
+            const email = document.getElementById('resetEmail').value.trim();
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { Auth.toast('有効なメールアドレスを入力してください', 'error'); return; }
+            this.disabled = true;
+            this.innerHTML = '<span class="loading-spinner"></span>Sending...';
+            const res = await Auth.resetPassword(email);
+            this.disabled = false;
+            this.textContent = 'Send Reset Link';
+            if (res.ok) { Auth.toast('Reset link transmitted — check your inbox', 'info', 6000); closeModal(); }
+            else Auth.toast(res.error, 'error');
+        });
+    </script>
+</body>
+</html>
