@@ -384,6 +384,20 @@
         .hidden {
             display: none;
         }
+
+        .contact-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100dvh;
+            margin: 0;
+            box-sizing: border-box;
+        }
+
+        .contact-modal.show {
+            display: flex;
+        }
     </style>
 </head>
 <body class="font-sans antialiased p-3 sm:p-6 md:p-10 min-h-screen flex items-center justify-center relative overflow-x-hidden selection:bg-green-500 selection:text-black">
@@ -445,11 +459,11 @@
                     WELCOME ONBOARD, <span class="text-military-accent font-mono" id="greeting-name">RANK / NAME UNASSIGNED</span>
                 </h2>
             </div>
-            <a href="bnb-verification.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-military-800 hover:bg-military-700 text-military-accent font-mono text-xs font-bold uppercase tracking-wider rounded border border-military-accent/40 transition-all hover:border-military-accent active:scale-95 shadow-md">
+            <button id="bnbStatusBtn" type="button" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-military-800 hover:bg-military-700 text-military-accent font-mono text-xs font-bold uppercase tracking-wider rounded border border-military-accent/40 transition-all hover:border-military-accent active:scale-95 shadow-md">
                 <i class="fa-solid fa-shield-cat text-sm"></i>
                 <span>BNB Verification Status</span>
                 <i class="fa-solid fa-chevron-right text-[10px]"></i>
-            </a>
+            </button>
         </div>
 
         <!-- Profile Photo & Identifier Grid -->
@@ -588,7 +602,7 @@
 
         <!-- Footer Actions -->
         <div class="pt-6 border-t border-military-border flex flex-col sm:flex-row items-center justify-between gap-4">
-            <button class="w-full sm:w-auto px-6 py-3 rounded bg-military-800 hover:bg-military-700 text-military-accent font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-military-accent/30 transition-all">
+            <button id="contactBtn" type="button" class="w-full sm:w-auto px-6 py-3 rounded bg-military-800 hover:bg-military-700 text-military-accent font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 border border-military-accent/30 transition-all">
                 <i class="fa-solid fa-headset"></i>
                 <span>Contact</span>
             </button>
@@ -599,6 +613,28 @@
             </button>
         </div>
 
+    </div>
+
+    <div id="contactModal" class="contact-modal fixed inset-0 bg-black/85 backdrop-blur-md items-center justify-center z-50 p-4">
+        <div class="hud-card max-w-md w-full rounded p-6 text-center relative border-military-accent/60 bg-military-950 text-white shadow-2xl">
+            <h3 class="text-lg font-mono font-bold text-military-accent uppercase tracking-widest mb-2">Contact Platform</h3>
+            <p class="text-gray-400 font-mono text-xs mb-6">Choose a secure contact platform.</p>
+            <div class="grid grid-cols-1 gap-3">
+                <a href="https://line.me/ti/p/DaCsYEKmzX" target="_blank" rel="noopener noreferrer" class="btn-primary py-3 rounded text-sm"><i class="fa-brands fa-line mr-2"></i>Open LINE</a>
+                <button id="tawkContactBtn" type="button" class="btn-ghost py-3 rounded text-sm"><i class="fa-solid fa-comments mr-2"></i>Open Tawk.to</button>
+                <button id="contactCloseBtn" type="button" class="btn-ghost py-2.5 rounded text-xs">Close</button>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="bnbComingSoonModal" class="contact-modal fixed inset-0 bg-black/85 backdrop-blur-md items-center justify-center z-50 p-4">
+        <div class="hud-card max-w-sm w-full rounded p-7 text-center border-military-gold/60 bg-military-950 text-white shadow-2xl">
+            <div class="text-military-gold text-3xl mb-3"><i class="fa-solid fa-hourglass-half"></i></div>
+            <h3 class="text-xl font-mono font-bold text-military-gold uppercase tracking-widest mb-2">Coming Soon</h3>
+            <p class="text-gray-400 font-mono text-xs mb-6">BNB Certification Status will be available soon.</p>
+            <button id="bnbComingSoonCloseBtn" type="button" class="btn-ghost py-2.5 px-6 rounded text-xs">Close</button>
+        </div>
     </div>
 
     <!-- Logout Modal -->
@@ -625,6 +661,14 @@
     <script src="js/supabase-config.js?v=connected2"></script>
     <script src="js/auth.js?v=supabase3"></script>
     <script src="js/ja.js?v=2"></script>
+    <script type="text/javascript">
+        var Tawk_API = Tawk_API || {}, Tawk_LoadStart = new Date();
+        (function () {
+            var s1 = document.createElement('script'), s0 = document.getElementsByTagName('script')[0];
+            s1.async = true; s1.src = 'https://embed.tawk.to/6ae3a3f14a1ca2346f320c0f/default';
+            s1.charset = 'UTF-8'; s1.setAttribute('crossorigin', '*'); s0.parentNode.insertBefore(s1, s0);
+        })();
+    </script>
     <script>
         // Session guard: unauthenticated visitors are sent to sign-in.
         Promise.resolve(Auth.hasSession()).then(ok => {
@@ -640,6 +684,51 @@
         const logoutModal = document.getElementById('logoutModal');
         const stayBtn = document.getElementById('stayBtn');
         const logOutBtn = document.getElementById('logOutBtn');
+        const contactBtn = document.getElementById('contactBtn');
+        const contactModal = document.getElementById('contactModal');
+        const contactCloseBtn = document.getElementById('contactCloseBtn');
+        const tawkContactBtn = document.getElementById('tawkContactBtn');
+        const bnbStatusBtn = document.getElementById('bnbStatusBtn');
+        const bnbComingSoonModal = document.getElementById('bnbComingSoonModal');
+        const bnbComingSoonCloseBtn = document.getElementById('bnbComingSoonCloseBtn');
+        let bnbPageScrollY = 0;
+        const closeBnbModal = () => {
+            bnbComingSoonModal.classList.remove('show');
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            window.scrollTo(0, bnbPageScrollY);
+        };
+        const openBnbModal = () => {
+            bnbPageScrollY = window.scrollY;
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+            bnbComingSoonModal.classList.add('show');
+        };
+        bnbStatusBtn.addEventListener('click', openBnbModal);
+        bnbComingSoonCloseBtn.addEventListener('click', closeBnbModal);
+        bnbComingSoonModal.addEventListener('click', event => { if (event.target === bnbComingSoonModal) closeBnbModal(); });
+        let contactPageScrollY = 0;
+        const closeContactModal = () => {
+            contactModal.classList.remove('show');
+            document.body.style.overflow = '';
+            document.documentElement.style.overflow = '';
+            window.scrollTo(0, contactPageScrollY);
+        };
+        const openContactModal = () => {
+            contactPageScrollY = window.scrollY;
+            document.body.style.overflow = 'hidden';
+            document.documentElement.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+            contactModal.classList.add('show');
+        };
+        contactBtn.addEventListener('click', openContactModal);
+        contactCloseBtn.addEventListener('click', closeContactModal);
+        contactModal.addEventListener('click', event => { if (event.target === contactModal) closeContactModal(); });
+        tawkContactBtn.addEventListener('click', () => {
+            if (window.Tawk_API && typeof window.Tawk_API.maximize === 'function') { window.Tawk_API.maximize(); closeContactModal(); }
+            else tawkContactBtn.textContent = 'Tawk.to is loading...';
+        });
 
         logoutBtn.addEventListener('click', () => {
             logoutModal.classList.add('show');
