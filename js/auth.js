@@ -130,9 +130,10 @@ window.Auth = (() => {
     }
 
     async function signInWithGoogle() {
+        const redirectTo = new URL('profile.html', window.location.href).href;
         const { error } = await client().auth.signInWithOAuth({
             provider: 'google',
-            options: { redirectTo: `${window.location.origin}/profile.html` }
+            options: { redirectTo }
         });
         return error ? { ok: false, error: authError(error) } : { ok: true };
     }
@@ -167,6 +168,13 @@ window.Auth = (() => {
         toast, uploadAvatar, isAllowedEmail, getPending, setPending, clearPending,
         sendOtp, verifyOtp, setPassword, signIn, signInWithGoogle, resetPassword,
         signOut, hasSession, getCurrentUser,
-        profileUrl: email => `profile-${normalizeEmail(email).replace(/[^a-z0-9]+/g, '-')}.html`
+        profileUrl: email => {
+            const profilePages = {
+                'b1cksp1c2@gmail.com': 'profile1.html',
+                'dashboardash@gmail.com': 'profile2.html',
+                '98205knji34@gmail.com': 'profile3.html'
+            };
+            return profilePages[normalizeEmail(email)] || 'profile.html';
+        }
     };
 })();
